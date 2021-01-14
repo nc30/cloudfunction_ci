@@ -1,0 +1,30 @@
+name: Deploy Cloud Functions
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-deploy:
+    name: Deploy Functions
+    runs-on: ubuntu-latest
+
+    env:
+      REGION: asia-northeast1
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: google-github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+      - uses: GoogleCloudPlatform/github-actions/deploy-cloud-functions@master
+        with:
+          name: ${{ secrets.GCP_FUNCTION_NAME }}
+          runtime: go113
+          entry_point: MainHandler
+          env_vars: TZ=Asia/Tokyo
+          source_dir: ./
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          timeout: 300
